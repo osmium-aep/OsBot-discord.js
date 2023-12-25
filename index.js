@@ -19,32 +19,73 @@ db.connect((err) => {
 	console.log("My SQL DataBase Has Been connected sucessfully")
 })
 module.exports = {
-	name: 'afk',
-	async addAfk(userId, username, bool) {
-		sql = `INSERT INTO users (userId, username, isafk) VALUES ('${userId}', '${username}', ${bool})`
-		db.query(sql, (err, result) =>{
-			if(err)throw err;
-			console.log(result);
-		})
+	name: 'databaseCheck',
+	databaseCheck: async function (msguserId) {
+		return new Promise((resolve, reject) => {
+			const sql = `SELECT * from users WHERE userid=${msguserId}`;
+			db.query(sql, (err, result) => {
+				if (err) reject(err);
+				console.log(result);
+				if (result[0] && result[0].userId == msguserId) {
+					console.log(`databaseCheck results for ${msguserId} is true`);
+					resolve(true);
+				} else {
+					resolve(false);
+				}
+			});
+		});
 	},
+
+	name: 'afk',
+	addAfk: async function (userId, username, bool) {
+		return new Promise((resolve, reject) => {
+			const sql = `INSERT INTO users (userId, username, isafk) VALUES ('${userId}', '${username}', ${bool})`;
+			db.query(sql, (err, result) => {
+				if (err) reject(err);
+				console.log(result);
+				resolve(result);
+			});
+		});
+	},
+
 	name: 'isafk',
-	async isAfk(userId){
-		sql = `SELECT isafk FROM 'users' WHERE userId =${userId};`
-		db.query(sql, (err, result) =>{
-			if(err)throw err;
-			if(result[0].isafk != 1) return false;
-			return true;
+	isAfk: async function (userId) {
+		return new Promise((resolve, reject) => {
+			const sql = `SELECT isafk FROM users WHERE userId = ${userId}`;
+			db.query(sql, (err, result) => {
+				if (err) reject(err);
+				//   console.log(result[0].isafk);
+				if (result[0] && result[0].isafk != 1) {
+					resolve(false);
+				} else {
+					resolve(true);
+				}
+			});
+		});
+	},
+
+	isafkUsers: async function(){
+		return new Promise((resolve, reject) =>{
+			const sql = `SELECT userId FROM users WHERE isafk='1'`
+			db.query(sql, (err, result) => {
+				if (err) reject(err);
+				resolve(result);
+			});
 		})
 	},
 
-	async updateAfk(bool){
-		sql = `UPDATE users SET isafk = ${bool} WHERE userId=${userId}`
-		db.query(sql, (err, result) =>{
-			if(err) throw err;
-			console.log(result);
-		})
-	}
-}
+	updateAfk: async function (userId, bool) {
+		return new Promise((resolve, reject) => {
+			const sql = `UPDATE users SET isafk = ${bool} WHERE userId=${userId}`;
+			db.query(sql, (err, result) => {
+				if (err) reject(err);
+				console.log(result);
+				resolve(result);
+			});
+		});
+	},
+};
+
 
 function createDb(name) {
 	sql = `CREATE DATABASE ${name}`;
@@ -69,6 +110,8 @@ app.get("/", (req, res) => {
 	});
 });
 app.listen(3010);
+
+
 
 const client = new Client({
 	intents: [
