@@ -8,14 +8,19 @@ module.exports = {
         const userId = message.author.id;
         const username = message.author.username;
         const bool = args[1];
-
+        
+        
         if (args[0] == 'afk') {
             try {
                 const databaseCheck = await db.databaseCheck(userId);
                 if (!databaseCheck) {
                     await db.addAfk(userId, username, 'FALSE');
                 }
-
+                
+                if(args[1] == undefined){
+                    message.channel.send('UnKnown Command! use \`os help\` for more command info.');
+                    return;
+                }
                 if (bool.toLowerCase() == 'on') {
                     const isAfk = await db.isAfk(userId);
                     if (!isAfk) {
@@ -33,6 +38,7 @@ module.exports = {
                 }
             } catch (error) {
                 console.error(error);
+                message.channel.send('An Error occurred in Afk command Send message to <@808318773257437216> immediately')
                 // Handle the error appropriately
             }
         }

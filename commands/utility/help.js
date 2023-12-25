@@ -1,6 +1,51 @@
 module.exports = {
-    name:'help',
-    async execute(message){
-        message.channel.send(`\`ping:: To make sure The bot is alive or dead. //syntax: os ping\nafk:: if on, Whenever someone mention you They will get notified with a message.. and You will recieve a Dm from me. //syntax: os afk [on | off]\``)
-    }
+  name: 'help',
+  async execute(message) {
+    const helpMessage = `
+
+\`\`\`markdown
+# Command Help
+
+## Config Commands:
+
+\*\*os invite:\*\*
+  Get the invite link for the bot.
+
+  Example:
+  \`\`\`bash
+  os invite
+  \`\`\`
+
+  
+## Utility Commands:
+
+\*\*os afk [on | off]:\*\*
+  Toggle AFK mode. When on, mentions will trigger a notification, and you'll receive a DM.
+
+  Example:
+  \`\`\`bash
+  os afk on
+  os afk off
+  \`\`\`
+
+  \*\*os help\*\*
+  Display this help message.
+
+  Example:
+  \`\`\`bash
+  os help
+  \`\`\`
+
+  \*\*os ping:\*\*
+  Check if the bot is alive or dead.
+
+  Example:
+  \`\`\`bash
+  os ping
+  \`\`\`
+\`\`\`
+        `;
+
+    message.channel.send(helpMessage);
+  }
 }

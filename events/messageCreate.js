@@ -9,7 +9,6 @@ module.exports = {
     async execute(message) {
         messageArray = Array.from(message.content);
         if (!message.content.toLowerCase().startsWith(prefix) || message.author.bot) return;
-
         const args = await message.content.slice(prefix.length).trim().split(/ +/);
         const command = await args.shift().toLowerCase();
 
@@ -25,10 +24,13 @@ module.exports = {
             for (file of commandFiles) {
                 const filePath = path.join(commandsPath, file);
                 const cmd = require(filePath);
-                if (cmd.name == command && messageArray[2]== ' ') {
-                    await cmd.execute(message);
-                    break;
-                }
+                console.log(cmd);
+                // if (cmd.name != command && messageArray[2] == ' ') {message.channel.send('UnKnown Command! use \`os help\` for more command info.'); return;}
+                    if (cmd.name == command && messageArray[2] == ' ') {
+                        await cmd.execute(message);
+                        console.log("cmd.name == command")
+                        break;
+                    }
             }
         }
     },
