@@ -5,7 +5,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const config = require('./config.json');
 const { channel } = require('node:diagnostics_channel');
+const { isAsyncFunction } = require('node:util/types');
 
+
+// DATABASE
 const db = mysql.createConnection({
 	host: config.host,
 	user: config.user,
@@ -45,6 +48,16 @@ module.exports = {
 				console.log(result);
 				resolve(result);
 			});
+		});
+	},
+	addautoMeme:async function (guildId, guildName, channelId, channelName, autoMeme){
+		return new Promise((resolve, reject) => {
+			const sql = `INSERT INTO automemedb (guildId, guildName, channelId, channelName, autoMeme) VALUES ('${guildId}', '${guildName}', '${channelId}', '${channelName}', '${autoMeme}')`
+			db.query(sql, (err, result) => {
+				if (err) reject(err);
+				console.log(result);
+				resolve(result);
+			})
 		});
 	},
 
@@ -95,13 +108,16 @@ function createDb(name) {
 	})
 }
 
-function createUsersTable() {
-	sql = `CREATE TABLE users(id int AUTO_INCREMENT, userId VARCHAR(255) NOT NULL, username VARCHAR(255), isafk BOOLEAN, PRIMARY KEY(id))`
+function createTable() {
+	sql = `CREATE TABLE autoMemeDb(id int AUTO_INCREMENT, guildId VARCHAR(255) NOT NULL, guildName VARCHAR(255) NOT NULL, channelId VARCHAR(255) NOT NULL, channelName VARCHAR(255) NOT NULL, autoMeme BOOLEAN, PRIMARY KEY(id))`
 	db.query(sql, (err, result) => {
 		if (err) throw err;
 		console.log(result)
 	})
 }
+
+
+// KEEP ALIVE
 
 const app = express();
 app.get("/", (req, res) => {
@@ -111,7 +127,7 @@ app.get("/", (req, res) => {
 });
 app.listen(3010);
 
-
+// BOT 
 
 const client = new Client({
 	intents: [
@@ -121,6 +137,8 @@ const client = new Client({
 	],
 });
 
+// INTERACTION CREATE
+
 // client.commands = new Collection();
 // const foldersPath = path.join(__dirname, 'commands');
 // const commandFolders = fs.readdirSync(foldersPath);
@@ -155,6 +173,8 @@ const client = new Client({
 // 		}
 // 	}
 // }
+
+// EVENTS
 
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
@@ -170,6 +190,6 @@ for (const file of eventFiles) {
 }
 
 
-
+// LOGIN
 
 client.login(config.token);

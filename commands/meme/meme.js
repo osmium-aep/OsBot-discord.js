@@ -1,67 +1,61 @@
-const { MessageAttachment } = require('discord.js')
-const { createCanvas, loadImage } = require('canvas');
+
+const fetch = require('node-fetch')
+const { MessageAttachment, EmbedBuilder, Attachment } = require('discord.js')
 const fs = require('node:fs')
 
 module.exports = {
     name: 'meme',
     async execute(message) {
-        const args = await message.content.slice(2).trim().split(/ +/);
-        message.channel.send('This is a meme');
 
-        async function createMeme(topText, bottomText, imagePath, outputImagePath) {
-            // Load the base image
-            const image = await loadImage(imagePath);
+        const apiUrl = 'https://meme-api.com/gimme/beastboyshub';
+        
+        // message.channel.send('This is a meme');
+        // Using the fetch function
+        fetch(apiUrl)
+            .then(response => {
+                // Check if the request was successful (status code 200)
+                if (!response.ok) {
+                    message.channel.send(`Network response was not ok, status code: ${response.status}`);
+                }
 
-            // Set canvas dimensions to match the image
-            const canvas = createCanvas(image.width, image.height);
-            const ctx = canvas.getContext('2d');
+                // Parse the JSON response
+                return response.json();
+            })
+            .then(data => {
+                // Handle the data from the API
+                try {
+                    // const hasEmbedLinksPermission = message.guild.me.permissionsIn(message.channel.id).has(Permissions.FLAGS.EMBED_LINKS)
 
-            // Draw the image on the canvas
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-            // Set text properties
-            ctx.fillStyle = 'white';
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 5;
-            ctx.font = '40px Sans-serif';
-
-
-            // Draw top text
-            ctx.textAlign = 'center';
-            ctx.fillText(topText, canvas.width / 2, 50);
-            ctx.strokeText(topText, canvas.width / 2, 50);
-
-            // Draw bottom text
-            ctx.textAlign = 'center';
-            ctx.fillText(bottomText, canvas.width / 2, canvas.height - 20);
-            ctx.strokeText(bottomText, canvas.width / 2, canvas.height - 20);
-
-            // Save the canvas as an image file
-            const out = fs.createWriteStream(outputImagePath);
-            const stream = canvas.createPNGStream();
-            stream.pipe(out);
-
-            // Wait for the stream to finish writing the image file
-            await new Promise((resolve, reject) => {
-                out.on('finish', resolve);
-                out.on('error', reject);
+                    // console.log(message.guild)
+                    memeEmbed = new EmbedBuilder()
+                        .setColor(0x0099FF)
+                        .setTitle(data.title)
+                        .setAuthor({ name: data.author, iconURL: data.preview[0], url: data.postLink })
+                        .setImage(data.url)
+                        .setTimestamp()
+                        .setFooter({ text: `from r/${data.subreddit}` })
+                    // message.channel.send({ embeds: [memeEmbed] })
+                    // let attachment = new MessageAttachment(data.url);
+                    // message.channel.send({content: data.title, files: [attachment]})
+                    message.channel.send(`# ${data.title}`)
+                    message.channel.send(data.url);
+                    message.channel.send(`from r/${data.subreddit}`)
+                    console.log(data);
+                } catch (err) {
+                    console.log(err);
+                    message.channel.send(`Error: ${err}`);
+                    // message.channel.send('Bot Does Not Have Permissions to send embed in This Channel');
+                }
+            })
+            .catch(error => {
+                // Handle errors during the fetch
+                console.error('Fetch error:', error);
             });
-
-            // Send the image as a message in Discord
-            // message.channel.send({
-            //     content: 'Check out this meme:',
-            //     files: [outputImagePath],
-            // });
-            // }
+        const args = await message.content.slice(2).trim().split(/ +/);
+    }
 
 
-        }
 
 
-        message.channel.send('args: ' + args)
-        // Example usage
-        // createMeme(args[1], args[2], 'F:/Work space/OS Bot/commands/meme/rock.png', 'meme.png');
-        // message.channel.send({ content: 'Check out this meme:', files: [createMeme('This is', 'RockStar Games', 'F:/Work space/OS Bot/commands/meme/rock.png', 'meme.png')] });
 
-    },
 }
